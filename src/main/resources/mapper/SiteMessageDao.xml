@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.message.server.dao.SiteMessageDao">
+    <resultMap id="BaseResultMap" type="com.message.server.model.SiteMessage">
+        <id column="id" jdbcType="CHAR" property="id"/>
+        <result column="create_user" jdbcType="CHAR" property="createUser"/>
+        <result column="update_user" jdbcType="CHAR" property="updateUser"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="enterprise_ccode" jdbcType="VARCHAR" property="enterpriseCcode"/>
+        <result column="dept_id" jdbcType="VARCHAR" property="deptId"/>
+        <result column="del_flag" jdbcType="INTEGER" property="delFlag"/>
+        <result column="title" jdbcType="VARCHAR" property="title"/>
+        <result column="category_id" jdbcType="INTEGER" property="categoryId"/>
+        <result column="category_name" jdbcType="VARCHAR" property="categoryName"/>
+        <result column="ref_to_user_id" jdbcType="CHAR" property="refToUserId"/>
+        <result column="content" jdbcType="LONGVARCHAR" property="content"/>
+        <result column="params" jdbcType="LONGVARCHAR" property="params"/>
+    </resultMap>
+    <insert id="insert" parameterType="com.message.server.model.SiteMessage">
+        insert into app_site_message (id, create_user, update_user,
+        create_time, update_time, enterprise_ccode,
+        dept_id, del_flag, title,
+        category_id, category_name, ref_to_user_id,
+        content, params)
+        values (#{id,jdbcType=CHAR}, #{createUser,jdbcType=CHAR}, #{updateUser,jdbcType=CHAR},
+        #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{enterpriseCcode,jdbcType=VARCHAR},
+        #{deptId,jdbcType=VARCHAR}, #{delFlag,jdbcType=INTEGER}, #{title,jdbcType=VARCHAR},
+        #{categoryId,jdbcType=INTEGER}, #{categoryName,jdbcType=VARCHAR}, #{refToUserId,jdbcType=CHAR},
+        #{content,jdbcType=LONGVARCHAR}, #{params,jdbcType=LONGVARCHAR})
+    </insert>
+    <select id="selectAllByUserId" resultMap="BaseResultMap">
+        select a.id, a.create_user, a.update_user, a.create_time, a.update_time, a.enterprise_ccode,
+        a.dept_id, a.del_flag, a.title, a.category_id, a.category_name, a.ref_to_user_id, a.content, a.params
+        from app_site_message a
+        where a.del_flag = 0 and a.ref_to_user_id = #{userId,jdbcType=CHAR}
+        AND a.id NOT IN (SELECT c.ref_message_id FROM app_site_message_delete c WHERE c.del_flag=0 )
+
+        <if test="status != null and status == 0">
+            AND a.id NOT IN (SELECT b.ref_message_id FROM app_site_message_read b WHERE b.del_flag=0)
+        </if>
+
+        <if test="status != null and status == 1">
+            AND a.id IN (SELECT b.ref_message_id FROM app_site_message_read b WHERE b.del_flag=0)
+        </if>
+
+        <if test="categoryId != null and categoryId > 0">
+            AND a.category_id = #{categoryId,jdbcType=INTEGER}
+        </if>
+    </select>
+    <select id="selectOneByUserId" resultMap="BaseResultMap">
+        select a.id, a.create_user, a.update_user, a.create_time, a.update_time, a.enterprise_ccode,
+        a.dept_id, a.del_flag, a.title, a.category_id, a.category_name, a.ref_to_user_id, a.content, a.params
+        from app_site_message a
+        where a.id = #{id,jdbcType=CHAR} and a.del_flag = 0 and a.ref_to_user_id = #{userId,jdbcType=CHAR}
+        AND a.id NOT IN (SELECT c.ref_message_id FROM app_site_message_delete c WHERE c.del_flag=0 )
+    </select>
+    <select id="selectCount" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT count(0) FROM app_site_message a
+        WHERE a.del_flag = 0 AND a.ref_to_user_id = #{userId,jdbcType=CHAR}
+        AND a.id NOT IN (SELECT c.ref_message_id FROM app_site_message_delete c WHERE c.del_flag=0 )
+
+        <if test="status != null and status == 0">
+            AND a.id NOT IN (SELECT b.ref_message_id FROM app_site_message_read b WHERE b.del_flag=0)
+        </if>
+
+        <if test="status != null and status == 1">
+            AND a.id IN (SELECT b.ref_message_id FROM app_site_message_read b WHERE b.del_flag=0)
+        </if>
+
+        <if test="categoryId != null and categoryId > 0">
+            AND a.category_id = #{categoryId,jdbcType=INTEGER}
+        </if>
+    </select>
+
+    <select id="selectCategory" resultType="java.util.HashMap">
+        SELECT DISTINCT category_id  FROM app_site_message WHERE del_flag=0
+    </select>
+</mapper>

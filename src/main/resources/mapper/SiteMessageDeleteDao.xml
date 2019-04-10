@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.message.server.dao.SiteMessageDeleteDao">
+    <resultMap id="BaseResultMap" type="com.message.server.model.SiteMessageDelete">
+        <id column="id" jdbcType="CHAR" property="id"/>
+        <result column="create_user" jdbcType="CHAR" property="createUser"/>
+        <result column="update_user" jdbcType="CHAR" property="updateUser"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="enterprise_ccode" jdbcType="VARCHAR" property="enterpriseCcode"/>
+        <result column="dept_id" jdbcType="VARCHAR" property="deptId"/>
+        <result column="del_flag" jdbcType="INTEGER" property="delFlag"/>
+        <result column="ref_message_id" jdbcType="CHAR" property="refMessageId"/>
+    </resultMap>
+    <insert id="insert" parameterType="java.util.List">
+        insert into app_site_message_delete (id, create_user, update_user,
+        create_time, update_time, enterprise_ccode,
+        dept_id, del_flag, ref_message_id
+        )
+        values
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id,jdbcType=CHAR}, #{item.createUser,jdbcType=CHAR}, #{item.updateUser,jdbcType=CHAR},
+            #{item.createTime,jdbcType=TIMESTAMP}, #{item.updateTime,jdbcType=TIMESTAMP},
+            #{item.enterpriseCcode,jdbcType=VARCHAR},
+            #{item.deptId,jdbcType=VARCHAR}, #{item.delFlag,jdbcType=INTEGER}, #{item.refMessageId,jdbcType=CHAR}
+            )
+        </foreach>
+    </insert>
+    <select id="selectByMessageId" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select id, create_user, update_user, create_time, update_time, enterprise_ccode,
+        dept_id, del_flag, ref_message_id
+        from app_site_message_delete
+        where ref_message_id = #{messageId,jdbcType=CHAR} and del_flag = 0
+     </select>
+</mapper>
